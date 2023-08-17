@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ransomware Impact Estimator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <form id="riskForm">
+        <div id="assets-container">
+            Asset Name: <input type="text" name="asset_name[]" required><br>
+            
+            Asset Type:
+            <select name="asset_type[]">
+                <option value="10">Hardware</option>
+                <option value="20">Software</option>
+                <option value="20">Data</option>
+            </select><br>
+        
+            Criticality/Importance:
+            <select name="criticality[]">
+                <option value="20">Very High</option>
+                <option value="15">Slightly High</option>
+                <option value="10">Medium</option>
+                <option value="5">Slightly Low</option>
+                <option value="2">Low</option>
+            </select><br>
+            
+            Sensitivity of Data within Asset:
+            <select name="data_sensitivity[]">
+                <option value="10">Highly Sensitive</option>
+                <option value="5">Moderately Sensitive</option>
+                <option value="2">Not Sensitive</option>
+            </select><br>
+            
+            Dependency Level:
+            <select name="dependency_level[]">
+                <option value="10">High</option>
+                <option value="5">Medium</option>
+                <option value="2">Low</option>
+            </select><br>
+        
+            Back-up Status:
+            <select name="backup_status[]">
+                <option value="0">Backed Up</option>
+                <option value="10">Not Backed Up</option>
+            </select><br>
+            
+            Incident History:
+            <select name="incident_history[]">
+                <option value="10">Multiple Incidents</option>
+                <option value="5">One Incident</option>
+                <option value="1">No Incidents</option>
+            </select><br>
+        </div>
+        
+        <button type="button" onclick="addAssetForm()">Add Another Asset</button>
+        <button type="button" onclick="calculateRisk()">Calculate</button>
+        <button type="button" onclick="resetForm()">Reset</button>
+    </form>
+
+    <canvas id="myChart" width="400" height="150"></canvas>
+
+    <hr>
+
+    <div id="ttp-info-section">
+        <h3>Common TTPs encountered in ransomware attacks:</h3>
+        <ul>
+            <li><a href="https://attack.mitre.org/techniques/T1566/002/" target="_blank">Spear Phishing Link</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1566/001/" target="_blank">Spear Phishing Attachement</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1204/" target="_blank">User Execution</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1027" target="_blank">Obfuscated Files or Information</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1036/" target="_blank">Masquerading</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1083/" target="_blank">File or Directory Discovery</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1486/" target="_blank">Data Encrypted for Impact</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1485/" target="_blank">Data Destruction</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1070/004/" target="_blank">File Deletion</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1564/001/" target="_blank">Hidden Files and Directories</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1133/" target="_blank">External Remote Services</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1569/002/" target="_blank">Service Execution </a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1056/004/" target="_blank">Credential API Hooking </a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1546/003/" target="_blank">Windows Management Instrumentation Event Subscription </a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank">Unix Shell</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1072/" target="_blank">Third-party Software</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1218/009/" target="_blank">System Binary Proxy Execution:Regsvcs/Regasm</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1053/" target="_blank">Scheduled Task/Job </a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1136/" target="_blank">Create Account </a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1574/004/" target="_blank">Hijack Execution Flow:Dylib Hijacking </a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1056/" target="_blank">Input Capture</a></li>
+            <li><a href="https://attack.mitre.org/techniques/T1553/002/" target="_blank">Code Signing </a></li>
+        </ul>
+    </div>
+
+    <div id="ttp-selection-section">
+        <h3>Select Top 5 TTPs Vulnerabilities for the Asset with Highest Risk</h3>
+        <select id="ttp-dropdown-1">
+            <option value="Spear Phishing Link">Spear Phishing Link</option>
+            <option value="Spear Phishing Attachement">Spear Phishing Attachement</option>
+            <option value="User Execution">SUser Execution</option>
+            <option value="Obfuscated Files or Information">Obfuscated Files or Information</option>
+            <option value="Masquerading">Masquerading</option>
+            <option value="File or Directory Discovery">File or Directory Discovery</option>
+            <option value="Data Encrypted for Impact">Data Encrypted for Impact</option>
+            <option value="Data Destruction">Data Destruction</option>
+            <option value="File Deletion">File Deletion</option>
+            <option value="Hidden Files and Directories">Hidden Files and Directories</option>
+            <option value="External Remote Services">External Remote Services</option>
+            <option value="Service Execution">Service Execution</option>
+            <option value="Credential API Hooking">Credential API Hooking</option>
+            <option value="Windows Management Instrumentation Event Subscription">Windows Management Instrumentation Event Subscription</option>
+            <option value="Unix Shell">Unix Shell</option>
+            <option value="Third-party Software">Third-party Software</option>
+            <option value="System Binary Proxy Execution:Regsvcs/Regasm">System Binary Proxy Execution:Regsvcs/Regasm</option>
+            <option value="Scheduled Task/Job">Scheduled Task/Job/option>
+            <option value="Create Account">Create Account</option>
+            <option value="Hijack Execution Flow:Dylib Hijacking">Hijack Execution Flow:Dylib Hijacking</option>
+            <option value="Input Capture">Input Capture</option>
+            <option value="Code Signing ">Code Signing </option>
+        </select>
+
+        <!-- Repeat for the other 4 dropdowns -->
+        <select id="ttp-dropdown-2">
+            <option value="Spear Phishing Link">Spear Phishing Link</option>
+            <option value="Spear Phishing Attachement">Spear Phishing Attachement</option>
+            <option value="User Execution">SUser Execution</option>
+            <option value="Obfuscated Files or Information">Obfuscated Files or Information</option>
+            <option value="Masquerading">Masquerading</option>
+            <option value="File or Directory Discovery">File or Directory Discovery</option>
+            <option value="Data Encrypted for Impact">Data Encrypted for Impact</option>
+            <option value="Data Destruction">Data Destruction</option>
+            <option value="File Deletion">File Deletion</option>
+            <option value="Hidden Files and Directories">Hidden Files and Directories</option>
+            <option value="External Remote Services">External Remote Services</option>
+            <option value="Service Execution">Service Execution</option>
+            <option value="Credential API Hooking">Credential API Hooking</option>
+            <option value="Windows Management Instrumentation Event Subscription">Windows Management Instrumentation Event Subscription</option>
+            <option value="Unix Shell">Unix Shell</option>
+            <option value="Third-party Software">Third-party Software</option>
+            <option value="System Binary Proxy Execution:Regsvcs/Regasm">System Binary Proxy Execution:Regsvcs/Regasm</option>
+            <option value="Scheduled Task/Job">Scheduled Task/Job/option>
+            <option value="Create Account">Create Account</option>
+            <option value="Hijack Execution Flow:Dylib Hijacking">Hijack Execution Flow:Dylib Hijacking</option>
+            <option value="Input Capture">Input Capture</option>
+            <option value="Code Signing ">Code Signing </option>
+        </select>
+        <select id="ttp-dropdown-3">
+            <option value="Spear Phishing Link">Spear Phishing Link</option>
+            <option value="Spear Phishing Attachement">Spear Phishing Attachement</option>
+            <option value="User Execution">SUser Execution</option>
+            <option value="Obfuscated Files or Information">Obfuscated Files or Information</option>
+            <option value="Masquerading">Masquerading</option>
+            <option value="File or Directory Discovery">File or Directory Discovery</option>
+            <option value="Data Encrypted for Impact">Data Encrypted for Impact</option>
+            <option value="Data Destruction">Data Destruction</option>
+            <option value="File Deletion">File Deletion</option>
+            <option value="Hidden Files and Directories">Hidden Files and Directories</option>
+            <option value="External Remote Services">External Remote Services</option>
+            <option value="Service Execution">Service Execution</option>
+            <option value="Credential API Hooking">Credential API Hooking</option>
+            <option value="Windows Management Instrumentation Event Subscription">Windows Management Instrumentation Event Subscription</option>
+            <option value="Unix Shell">Unix Shell</option>
+            <option value="Third-party Software">Third-party Software</option>
+            <option value="System Binary Proxy Execution:Regsvcs/Regasm">System Binary Proxy Execution:Regsvcs/Regasm</option>
+            <option value="Scheduled Task/Job">Scheduled Task/Job/option>
+            <option value="Create Account">Create Account</option>
+            <option value="Hijack Execution Flow:Dylib Hijacking">Hijack Execution Flow:Dylib Hijacking</option>
+            <option value="Input Capture">Input Capture</option>
+            <option value="Code Signing ">Code Signing </option>
+        </select>
+        <select id="ttp-dropdown-4">
+            <option value="Spear Phishing Link">Spear Phishing Link</option>
+            <option value="Spear Phishing Attachement">Spear Phishing Attachement</option>
+            <option value="User Execution">SUser Execution</option>
+            <option value="Obfuscated Files or Information">Obfuscated Files or Information</option>
+            <option value="Masquerading">Masquerading</option>
+            <option value="File or Directory Discovery">File or Directory Discovery</option>
+            <option value="Data Encrypted for Impact">Data Encrypted for Impact</option>
+            <option value="Data Destruction">Data Destruction</option>
+            <option value="File Deletion">File Deletion</option>
+            <option value="Hidden Files and Directories">Hidden Files and Directories</option>
+            <option value="External Remote Services">External Remote Services</option>
+            <option value="Service Execution">Service Execution</option>
+            <option value="Credential API Hooking">Credential API Hooking</option>
+            <option value="Windows Management Instrumentation Event Subscription">Windows Management Instrumentation Event Subscription</option>
+            <option value="Unix Shell">Unix Shell</option>
+            <option value="Third-party Software">Third-party Software</option>
+            <option value="System Binary Proxy Execution:Regsvcs/Regasm">System Binary Proxy Execution:Regsvcs/Regasm</option>
+            <option value="Scheduled Task/Job">Scheduled Task/Job/option>
+            <option value="Create Account">Create Account</option>
+            <option value="Hijack Execution Flow:Dylib Hijacking">Hijack Execution Flow:Dylib Hijacking</option>
+            <option value="Input Capture">Input Capture</option>
+            <option value="Code Signing ">Code Signing </option>
+        </select>
+        <select id="ttp-dropdown-5">
+            <option value="Spear Phishing Link">Spear Phishing Link</option>
+            <option value="Spear Phishing Attachement">Spear Phishing Attachement</option>
+            <option value="User Execution">SUser Execution</option>
+            <option value="Obfuscated Files or Information">Obfuscated Files or Information</option>
+            <option value="Masquerading">Masquerading</option>
+            <option value="File or Directory Discovery">File or Directory Discovery</option>
+            <option value="Data Encrypted for Impact">Data Encrypted for Impact</option>
+            <option value="Data Destruction">Data Destruction</option>
+            <option value="File Deletion">File Deletion</option>
+            <option value="Hidden Files and Directories">Hidden Files and Directories</option>
+            <option value="External Remote Services">External Remote Services</option>
+            <option value="Service Execution">Service Execution</option>
+            <option value="Credential API Hooking">Credential API Hooking</option>
+            <option value="Windows Management Instrumentation Event Subscription">Windows Management Instrumentation Event Subscription</option>
+            <option value="Unix Shell">Unix Shell</option>
+            <option value="Third-party Software">Third-party Software</option>
+            <option value="System Binary Proxy Execution:Regsvcs/Regasm">System Binary Proxy Execution:Regsvcs/Regasm</option>
+            <option value="Scheduled Task/Job">Scheduled Task/Job/option>
+            <option value="Create Account">Create Account</option>
+            <option value="Hijack Execution Flow:Dylib Hijacking">Hijack Execution Flow:Dylib Hijacking</option>
+            <option value="Input Capture">Input Capture</option>
+            <option value="Code Signing ">Code Signing </option>
+        </select>
+        
+        <button onclick="populateLikelihoodTable()">Confirm TTPs</button>
+    </div>
+
+    <!-- Likelihood Input Table -->
+    <div id="likelihood-section" style="display:none;">
+        <h3>Assign Likelihood of Success for Chosen TTPs</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>TTP</th>
+                    <th>Likelihood (%)</th>
+                </tr>
+            </thead>
+            <tbody id="likelihood-tbody">
+                <!-- Dynamically filled rows based on user's TTP selections -->
+            </tbody>
+        </table>
+        <button onclick="calculateTotalLikelihood()">Calculate Total Likelihood</button>
+    </div>
+
+    <hr>
+
+    <!-- Display total percentage of likelihood of success -->
+    <h2>Total Likelihood of Success: <span id="totalLikelihood">0</span>%</h2>
+
+    <div id="industry-attack-frequency">
+        Frequency of ransomware attacks within the industry of your organisation:
+        <select name="attack_frequency">
+            <option value="0.5">Very High</option>
+            <option value="0.4">Slightly High</option>
+            <option value="0.3">Medium</option>
+            <option value="0.2">Slightly Low</option>
+            <option value="0.1">Very Low</option>
+        </select>
+    </div>
+    
+    <h3>Selected Attack Frequency: <span id="displayFrequency">0.3</span></h3>
+</div>
+
+<div>
+    <label for="attack_count">How many times do you believe your organisation will encounter ransomware attacks within the next year? (Successful or Unsuccessful):</label>
+    <select name="attack_count" id="attack_count">
+        <option value="10">10</option>
+        <option value="9">9</option>
+        <option value="8">8</option>
+        <option value="7">7</option>
+        <option value="6">6</option>
+        <option value="5">5</option>
+        <option value="4">4</option>
+        <option value="3">3</option>
+        <option value="2">2</option>
+        <option value="1">1</option>
+    </select>
+    <p>Selected Number: <span id="displayCount">10</span></p>
+</div>
+
+<div>
+    <h2>Threat Event Frequency</h2>
+    <label>Threat Event Frequency:</label>
+    <p><span id="threatEventFrequency">0.00</span></p>
+</div>
+
+<div>
+    <h2>Loss Event Frequency</h2>
+    <label>Loss Event Frequency:</label>
+    <p><span id="lossEventFrequency">0.00</span></p>
+</div>
+
+<div class="feature-box">
+    <h2>Estimated Ransom Amount</h2>
+    <p>Based on past ransomware attacks in our industry and their ransom amounts, estimate the potential ransom you'd pay if your organisation were attacked.</p>
+    <label for="estimatedRansom">Amount:</label>
+    £ <input type="number" id="estimatedRansom" name="estimatedRansom" step="0.01" placeholder="Enter amount in GBP" required onchange="storeRansomValue()">
+    <p class="hint">Please enter a monetary value in GBP (£).</p>
+</div>
+
+<!-- Employees Count Section -->
+<div class="feature-box">
+    <h2>Number of Employees</h2>
+    <p>Please indicate the number of employees in your organisation.</p>
+    <label for="numberOfEmployees">Employee Count:</label>
+    <input type="number" id="numberOfEmployees" name="numberOfEmployees" placeholder="Number of employees" required onchange="storeEmployeeCount(); calculateLostProductivity();">
+    <p class="hint">Enter a numerical value.</p>
+</div>
+
+<!-- Downtime Estimate Section -->
+<div class="feature-box">
+    <h2>Estimated Downtime</h2>
+    <p>Provide an estimate of downtime in hours in case of a ransomware attack.</p>
+    <label for="estimatedDowntime">Downtime (in hours):</label>
+    <input type="number" id="estimatedDowntime" name="estimatedDowntime" placeholder="Enter downtime in hours" required onchange="storeDowntimeEstimate(); calculateLostProductivity();">
+    <p class="hint">Please enter an estimate in hours.</p>
+</div>
+
+<!-- Hourly Wage Section -->
+<div class="feature-box">
+    <h2>Hourly Wage of Employees</h2>
+    <label for="hourlyWage">Average hourly wage of employees in your organisation:</label>
+    £ <input type="number" id="hourlyWage" name="hourlyWage" step="0.01" placeholder="Enter wage in GBP" required onchange="storeHourlyWage(); calculateLostProductivity();">
+    <p class="hint">Please enter a monetary value in GBP (£).</p>
+</div>
+
+<div>
+    <h2>Lost Productivity</h2>
+    <p id="lostProductivityOutput">£0.00</p>
+    <button onclick="calculateLostProductivity()">Calculate Lost Productivity</button>
+</div>
+
+<!-- Average Daily Profit Section -->
+<div class="feature-box">
+    <h2>Average Daily Profit</h2>
+    <p>Please indicate the average daily profit of your organization.</p>
+    <label for="averageDailyProfit">Average Daily Profit:</label>
+    £ <input type="number" id="averageDailyProfit" name="averageDailyProfit" step="0.01" placeholder="Enter average daily profit in GBP" required onchange="storeAverageDailyProfit()">
+    <p class="hint">Please enter a monetary value in GBP (£).</p>
+</div>
+
+<!-- Estimated Downtime in Days Section -->
+<div class="feature-box">
+    <h2>Estimated Downtime in Days</h2>
+    <p>Provide an estimate of downtime in days in case of a ransomware attack.</p>
+    <label for="estimatedDowntimeDays">Downtime (in days):</label>
+    <input type="number" id="estimatedDowntimeDays" name="estimatedDowntimeDays" placeholder="Enter downtime in days" required onchange="storeEstimatedDowntimeDays()">
+    <p class="hint">Please enter an estimate in days.</p>
+</div>
+
+<!-- Loss of Profit Section -->
+<div class="feature-box">
+    <h2>Loss of Profit</h2>
+    <p id="lossOfProfitOutput">£0.00</p>
+    <button onclick="calculateLossOfProfit()">Calculate Loss of Profit</button>
+</div>
+
+<!-- Loss Magnitude Section -->
+<div class="feature-box">
+    <h2>Total Loss Magnitude</h2>
+    <p id="totalLossMagnitudeOutput">£0.00</p>
+    <button onclick="calculateTotalLossMagnitude()">Calculate Total Loss Magnitude</button>
+</div>
+
+<!-- Display area for the Estimated Financial Risk -->
+<div class="financial-risk-container">
+    <h2>Financial Risk Estimation</h2>
+    
+    <p>
+        Estimated Financial Risk: <span id="estimatedFinancialRiskOutput">£0.00</span>
+    </p>
+    
+    <!-- Button to trigger the calculation -->
+    <button id="calculateRisk">Calculate Estimated Financial Risk</button>
+</div>
+
+<div id="chart-container">
+    <canvas id="myChart"></canvas>
+</div>
+      
+    <script src="scripts.js"></script>
+</body>
+</html>
+
+
+
