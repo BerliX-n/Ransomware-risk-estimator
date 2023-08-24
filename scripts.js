@@ -1,29 +1,29 @@
 let chartInstance; // Global variable to store the current chart instance.
 
-// Grabbing the dropdown and display elements
+
 const frequencyDropdown = document.querySelector('[name="attack_frequency"]');
 const displayFrequency = document.getElementById('displayFrequency');
 
-// Event listener to update displayed value when dropdown changes
+
 frequencyDropdown.addEventListener('change', function() {
     displayFrequency.innerText = frequencyDropdown.value;
 });
 
-// On page load, display the default value (Medium)
+
 document.addEventListener('DOMContentLoaded', function() {
     displayFrequency.innerText = frequencyDropdown.value;
 });
 
-// Grabbing the dropdown and display elements
+
 const attackCountDropdown = document.querySelector('#attack_count');
 const displayCount = document.getElementById('displayCount');
 
-// Event listener to update displayed value when dropdown changes
+
 attackCountDropdown.addEventListener('change', function() {
     displayCount.innerText = attackCountDropdown.value;
 });
 
-// On page load, display the default value (10)
+
 document.addEventListener('DOMContentLoaded', function() {
     displayCount.innerText = attackCountDropdown.value;
 });
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-// Function to add another set of fields for a new asset.
+
 function addAssetForm() {
     const formContainer = document.getElementById("assets-container");
 
@@ -130,13 +130,13 @@ function resetForm() {
         }
     }
 
-    // Reset dropdowns to their default value
+    
     let selectElements = document.getElementsByTagName('select');
     for (let i = 0; i < selectElements.length; i++) {
         selectElements[i].selectedIndex = 0;
     }
 
-    // Clear the graph by removing the canvas and creating it again.
+    
     const chartContainer = document.getElementById('chart-container');
     const oldCanvas = document.getElementById('myChart');
     chartContainer.removeChild(oldCanvas);
@@ -146,7 +146,7 @@ function resetForm() {
     chartContainer.appendChild(newCanvas);
 }
 
-// Function to calculate the risk values for each asset and plot on the chart.
+
 function calculateRisk() {
     const assetNames = document.querySelectorAll('input[name="asset_name[]"]');
     const assetTypes = document.querySelectorAll('select[name="asset_type[]"]');
@@ -168,12 +168,12 @@ function calculateRisk() {
         assetLabels.push(assetNames[i].value);
     }
 
-    // If there's a previous chart instance, destroy it to avoid overlapping.
+    
     if (chartInstance) {
         chartInstance.destroy();
     }
 
-    // Plotting data on the chart.
+    // Plotting data on the chart
     const ctx = document.getElementById('myChart').getContext('2d');
     chartInstance = new Chart(ctx, {
         type: 'bar',
@@ -231,7 +231,7 @@ function populateLikelihoodTable() {
         likelihoodCell.appendChild(input);
     }
 
-    // Show the likelihood input section
+    
     document.getElementById("likelihood-section").style.display = "block";
 }
 
@@ -246,7 +246,7 @@ function calculateTotalLikelihood() {
         count++;
     }
 
-    // Displaying the average likelihood among the selected TTPs
+    
     document.getElementById("totalLikelihood").innerText = (totalLikelihood / count).toFixed(2);
 }
 
@@ -288,7 +288,7 @@ function storeAverageDailyProfit() {
     averageDailyProfit = parseFloat(document.getElementById("averageDailyProfit").value);
     console.log("Stored average daily profit:", averageDailyProfit);
 
-    // Optional: Store the value in localStorage for persistence across sessions
+    
     localStorage.setItem('averageDailyProfit', averageDailyProfit);
 }
 
@@ -298,7 +298,7 @@ function storeEstimatedDowntimeDays() {
     estimatedDowntimeDays = parseFloat(document.getElementById("estimatedDowntimeDays").value);
     console.log("Stored estimated downtime in days:", estimatedDowntimeDays);
 
-    // Optional: Store the value in localStorage for persistence across sessions
+    
     localStorage.setItem('estimatedDowntimeDays', estimatedDowntimeDays);
 }
 
@@ -308,7 +308,7 @@ function storeAverageDailyProfit() {
     averageDailyProfit = parseFloat(document.getElementById("averageDailyProfit").value);
     console.log("Stored average daily profit:", averageDailyProfit);
     
-    // Optional: Store the value in localStorage for persistence across sessions
+    
     localStorage.setItem('averageDailyProfit', averageDailyProfit);
 }
 
@@ -335,19 +335,19 @@ function calculateTotalLossMagnitude() {
 }
 
 function calculateEstimatedFinancialRisk() {
-    // Get the Loss Event Frequency and Loss Magnitude from the DOM
+    
     const lossEventFrequency = parseFloat(document.getElementById('lossEventFrequency').innerText);
     const totalLossMagnitude = parseFloat(document.getElementById('totalLossMagnitudeOutput').innerText.replace('£', ''));
 
-    // Calculate the Estimated Financial Risk
+    
     const estimatedFinancialRisk = lossEventFrequency * totalLossMagnitude;
 
     console.log("Calculated Estimated Financial Risk:", estimatedFinancialRisk);
 
-    // Display the result on the webpage
+    
     document.getElementById("estimatedFinancialRiskOutput").innerText = `£${estimatedFinancialRisk.toFixed(2)}`;
 }
 
-// Add an event listener to trigger this function whenever necessary
+
 document.getElementById("calculateRisk").addEventListener('click', calculateEstimatedFinancialRisk);
 
